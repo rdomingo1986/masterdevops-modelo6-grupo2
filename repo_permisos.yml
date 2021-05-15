@@ -24,3 +24,5 @@ Resources:
 Outputs:
   PolicyArn:
     Value: !Ref CodeCommitRepoPolicy
+  RepoURL:
+    Value: !GetAtt Repo.CloneUrlHttp

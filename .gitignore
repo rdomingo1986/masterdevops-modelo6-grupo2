@@ -1,4 +1,4 @@
 *-credentials.txt
-users.json
+project.json
 node_modules
 package-lock.json

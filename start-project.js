@@ -21,6 +21,8 @@ const cfClient = new CloudFormationClient();
 
 const iamClient = new IAMClient();
 
+const projectData = JSON.parse(fs.readFileSync('project.json', 'utf8'));
+
 console.log('Please wait...');
 
 console.log('Creating Stack...');
@@ -30,23 +32,25 @@ runCommand();
 function runCommand() {
   createStack().then(function (outputs) {
     console.log('Stack creation complete...');
-    const users = JSON.parse(fs.readFileSync('users.json', 'utf8')).users;
-  
+    const users = projectData.users;
+    
     var data;
     users.forEach(function (user) {  
       createUser(user, outputs[0].OutputValue).then(function (response) {
-        data = 'Password: Abc.12345';
+        data = 'User: ' + user;
+        data += '\r\n'; 
+        data += 'Password: Abc.12345';
         data += '\r\n'; 
         data += 'AccessKeyId: ' + response.AccessKey.AccessKeyId;
         data += '\r\n'; 
         data += 'SecretAccessKey: ' + response.AccessKey.SecretAccessKey;
-        console.log(response.AccessKey);
         fs.writeFile(user + '-credentials.txt', data, function (err) {
           if (err) return console.log(err);
         });
         console.log(user + 'named created');
       });
     });
+    console.log('Repository URL: ' + outputs[1].OutputValue);
   });
 }
 
@@ -58,7 +62,7 @@ async function createStack() {
       Parameters: [
         {
           ParameterKey: 'RepositoryName',
-          ParameterValue: process.argv[2]
+          ParameterValue: projectData.repoName
         }
       ],
       Capabilities: ['CAPABILITY_NAMED_IAM']
