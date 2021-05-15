@@ -1,0 +1,52 @@
+Parameters:
+  UserName:
+    Type: String
+  UserPassword:
+    Type: String
+    NoEcho: true
+  RepositoryName:
+    Type: String
+Resources:
+  Repo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+
+  CodeCommitPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 'codecommit:*'
+            Resource: !GetAtt Repo.Arn
+          - Effect: Allow
+            Action: 'codecommit:ListRepositories'
+            Resource: '*'
+      ManagedPolicyName: RepoPolicyMasterDevOps
+  
+  IAMUserRepo:
+    Type: AWS::IAM::User
+    Properties: 
+      LoginProfile: 
+        Password: !Ref UserPassword
+        PasswordResetRequired: false
+      ManagedPolicyArns: 
+        - !Ref CodeCommitPolicy
+      UserName: !Ref UserName
+
+  UserAPICredentials:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref IAMUserRepo
+
+Outputs:
+  UserName:
+    Value: !Ref IAMUserRepo
+  UserPassword:
+    Value: !Ref UserPassword
+  UserAccessKeyId:
+    Value: !Ref UserAPICredentials
+  UserSecretKey:
+    Value: !GetAtt UserAPICredentials.SecretAccessKey

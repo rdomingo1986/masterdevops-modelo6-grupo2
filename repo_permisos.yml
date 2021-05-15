@@ -1,0 +1,26 @@
+Parameters:
+  RepositoryName:
+    Type: String
+Resources:
+  Repo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Ref RepositoryName
+
+  CodeCommitRepoPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 'codecommit:*'
+            Resource: !GetAtt Repo.Arn
+          - Effect: Allow
+            Action: 'codecommit:ListRepositories'
+            Resource: '*'
+      ManagedPolicyName: RepoPolicyMasterDevOps
+
+Outputs:
+  PolicyArn:
+    Value: !Ref CodeCommitRepoPolicy
